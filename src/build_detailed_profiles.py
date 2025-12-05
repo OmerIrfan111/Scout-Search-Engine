@@ -6,12 +6,7 @@ from datetime import datetime
 print("BUILDING COMPLETE PLAYER PROFILES WITH ALL DATA...")
 print("=" * 50)
 
-# Get the directory where this script is located
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Get the project root directory (parent of src/)
-PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-# Set base path for data
-base_path = os.path.join(PROJECT_ROOT, "data", "raw")
+base_path = "data/raw"
 
 def load_data_safely(file_path):
     try:
@@ -46,16 +41,15 @@ def get_transfer_history(player_id, transfer_df):
     
     transfer_text = "##Career Transfers\n"
     for _, transfer in player_transfers.iterrows():
-        from_team = str(transfer.get('from_team_name', 'Unknown')) if pd.notna(transfer.get('from_team_name')) else 'Unknown'
-        to_team = str(transfer.get('to_team_name', 'Unknown')) if pd.notna(transfer.get('to_team_name')) else 'Unknown'
-        season = str(transfer.get('season_name', '')) if pd.notna(transfer.get('season_name')) else ''
-        fee = transfer.get('transfer_fee', 0) if pd.notna(transfer.get('transfer_fee')) else 0
+        from_team = transfer.get('from_team_name', 'Unknown')
+        to_team = transfer.get('to_team_name', 'Unknown')
+        season = transfer.get('season_name', '')
+        fee = transfer.get('transfer_fee', 0)
         
-        transfer_text += f"- *{season}*: {from_team} → {to_team}"
+        transfer_text += f"- **{season}**: {from_team} → {to_team}"
         if fee > 0:
             transfer_text += f" (€{fee:,})"
-        transfer_date = str(transfer.get('transfer_date', '')) if pd.notna(transfer.get('transfer_date')) else ''
-        transfer_text += f" - {transfer_date}\n"
+        transfer_text += f" - {transfer.get('transfer_date', '')}\n"
     
     return transfer_text
 
@@ -77,13 +71,13 @@ def get_season_performances(player_id, performances_df):
     
     performance_text = "##Season Performance\n"
     for _, season in season_stats.iterrows():
-        apps = season.get('nb_on_pitch', 0) if pd.notna(season.get('nb_on_pitch')) else 0
-        goals = season.get('goals', 0) if pd.notna(season.get('goals')) else 0
-        assists = season.get('assists', 0) if pd.notna(season.get('assists')) else 0
-        team = str(season.get('team_name', 'Unknown')) if pd.notna(season.get('team_name')) else 'Unknown'
+        apps = season.get('nb_on_pitch', 0)
+        goals = season.get('goals', 0)
+        assists = season.get('assists', 0)
+        team = season.get('team_name', 'Unknown')
         
         if apps > 0:
-            performance_text += f"- *{season['season_name']}* ({team}): {apps} apps, {goals} goals, {assists} assists"
+            performance_text += f"- **{season['season_name']}** ({team}): {apps} apps, {goals} goals, {assists} assists"
             if season.get('minutes_played', 0) > 0:
                 performance_text += f", {season['minutes_played']:,} minutes"
             performance_text += "\n"
@@ -101,10 +95,10 @@ def get_market_value_history(player_id, market_value_df):
     
     value_text = "##Market Value History\n"
     for _, value in latest_values.iterrows():
-        date = str(value.get('date_unix', '')) if pd.notna(value.get('date_unix')) else ''
-        market_value = value.get('value', 0) if pd.notna(value.get('value')) else 0
-        if market_value > 0 and date:
-            value_text += f"- *{date}*: €{market_value:,.0f}\n"
+        date = value.get('date_unix', '')
+        market_value = value.get('value', 0)
+        if market_value > 0:
+            value_text += f"- **{date}**: €{market_value:,.0f}\n"
     
     return value_text
 
@@ -115,12 +109,12 @@ def get_injury_history(player_id, injuries_df):
     
     injury_text = "##Injury History\n"
     for _, injury in player_injuries.head(8).iterrows():
-        reason = str(injury.get('injury_reason', 'Unknown')) if pd.notna(injury.get('injury_reason')) else 'Unknown'
-        season = str(injury.get('season_name', '')) if pd.notna(injury.get('season_name')) else ''
-        days = injury.get('days_missed', 0) if pd.notna(injury.get('days_missed')) else 0
-        games = injury.get('games_missed', 0) if pd.notna(injury.get('games_missed')) else 0
+        reason = injury.get('injury_reason', 'Unknown')
+        season = injury.get('season_name', '')
+        days = injury.get('days_missed', 0)
+        games = injury.get('games_missed', 0)
         
-        injury_text += f"- *{reason}* ({season}): {days} days missed"
+        injury_text += f"- **{reason}** ({season}): {days} days missed"
         if games > 0:
             injury_text += f", {games} games missed"
         injury_text += "\n"
@@ -138,11 +132,11 @@ def get_national_career(player_id, national_df):
         goals = nat.get('goals', 0)
         
         if matches > 0:
-            nat_career += f"- *Caps: {matches}, **Goals*: {goals}"
+            nat_career += f"- **Caps**: {matches}, **Goals**: {goals}"
             if pd.notna(nat.get('career_state')):
-                nat_career += f", *Status*: {nat.get('career_state')}"
+                nat_career += f", **Status**: {nat.get('career_state')}"
             if pd.notna(nat.get('debut')):
-                nat_career += f", *Debut*: {nat.get('debut')}"
+                nat_career += f", **Debut**: {nat.get('debut')}"
             nat_career += "\n"
     
     return nat_career
@@ -155,11 +149,11 @@ def get_teammates(player_id, teammates_df):
     top_teammates = player_teammates.nlargest(6, 'minutes_played_with')
     teammates_text = "##Notable Teammates\n"
     for _, tm in top_teammates.iterrows():
-        teammate_name = str(tm.get('teammate_player_name', 'N/A')) if pd.notna(tm.get('teammate_player_name')) else 'N/A'
-        minutes = tm.get('minutes_played_with', 0) if pd.notna(tm.get('minutes_played_with')) else 0
+        teammate_name = tm.get('teammate_player_name', 'N/A')
+        minutes = tm.get('minutes_played_with', 0)
         if minutes > 0:
             hours = minutes // 60
-            teammates_text += f"- *{teammate_name}*: {hours:,} hours played together\n"
+            teammates_text += f"- **{teammate_name}**: {hours:,} hours played together\n"
     
     return teammates_text
 
@@ -172,20 +166,17 @@ def get_player_summary(player_profile, performances_df, player_id):
     total_apps = player_performances['nb_on_pitch'].sum()
     
     summary = f"##Career Summary\n"
-    position = str(player_profile.get('position', 'N/A')) if pd.notna(player_profile.get('position')) else 'N/A'
-    citizenship = str(player_profile.get('citizenship', 'N/A')) if pd.notna(player_profile.get('citizenship')) else 'N/A'
-    summary += f"- *Position*: {position}\n"
-    summary += f"- *Nationality*: {citizenship}\n"
+    summary += f"- **Position**: {player_profile.get('position', 'N/A')}\n"
+    summary += f"- **Nationality**: {player_profile.get('citizenship', 'N/A')}\n"
     
     if total_apps > 0:
-        summary += f"- *Career Apps*: {total_apps:,}\n"
+        summary += f"- **Career Apps**: {total_apps:,}\n"
     if total_goals > 0:
-        summary += f"- *Career Goals*: {total_goals:,}\n"
+        summary += f"- **Career Goals**: {total_goals:,}\n"
     if total_assists > 0:
-        summary += f"- *Career Assists*: {total_assists:,}\n"
+        summary += f"- **Career Assists**: {total_assists:,}\n"
     
-    current_club = str(player_profile.get('current_club_name', 'N/A')) if pd.notna(player_profile.get('current_club_name')) else 'N/A'
-    summary += f"- *Current Club*: {current_club}\n"
+    summary += f"- **Current Club**: {player_profile.get('current_club_name', 'N/A')}\n"
     
     return summary
 
@@ -196,13 +187,11 @@ complete_profiles = []
 for idx, player in profiles_df.iterrows():
     player_id = player['player_id']
     
-    player_name = str(player.get('player_name', 'Unknown')) if pd.notna(player.get('player_name')) else 'Unknown'
-    
     complete_profile = {
-        'player_id': int(player_id),
-        'player_name': player_name,
+        'player_id': player_id,
+        'player_name': player.get('player_name', ''),
         'detailed_content': f"""
-# {player_name}
+# {player.get('player_name', '')}
 
 {get_player_summary(player, performances_df, player_id)}
 
@@ -218,15 +207,15 @@ for idx, player in profiles_df.iterrows():
 
 {get_teammates(player_id, teammates_df)}
 
-Data sourced from Transfermarkt - Comprehensive football database
+*Data sourced from Transfermarkt - Comprehensive football database*
         """.strip(),
         'metadata': {
-            'position': str(player.get('position', '')) if pd.notna(player.get('position')) else '',
-            'nationality': str(player.get('citizenship', '')) if pd.notna(player.get('citizenship')) else '',
-            'current_club': str(player.get('current_club_name', '')) if pd.notna(player.get('current_club_name')) else '',
-            'birth_date': str(player.get('date_of_birth', '')) if pd.notna(player.get('date_of_birth')) else '',
-            'height': str(player.get('height', '')) if pd.notna(player.get('height')) else '',
-            'foot': str(player.get('foot', '')) if pd.notna(player.get('foot')) else ''
+            'position': player.get('position', ''),
+            'nationality': player.get('citizenship', ''),
+            'current_club': player.get('current_club_name', ''),
+            'birth_date': player.get('date_of_birth', ''),
+            'height': player.get('height', ''),
+            'foot': player.get('foot', '')
         }
     }
     
@@ -239,8 +228,7 @@ Data sourced from Transfermarkt - Comprehensive football database
 print(f"Created {len(complete_profiles)} COMPLETE player profiles")
 
 # Save complete profiles
-output_file = os.path.join(PROJECT_ROOT, "data", "processed", "complete_player_profiles.json")
-os.makedirs(os.path.dirname(output_file), exist_ok=True)
+output_file = "data/processed/complete_player_profiles.json"
 with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(complete_profiles, f, ensure_ascii=False, indent=2)
 

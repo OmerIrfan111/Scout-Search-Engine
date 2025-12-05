@@ -20,7 +20,13 @@ COMPREHENSIVE_STOP_WORDS = {
     "other", "some", "such", "no", "nor", "only", "own", "same", "so", "than", "too",
     "very", "can", "will", "just", "should", "now", "player", "club", "team", "football",
     "soccer", "match", "game", "season", "league", "cup", "champions", "premier", "la",
-    "bundesliga", "serie", "current", "main", "position", "nationality", "birth", "place"
+    "bundesliga", "serie", "current", "main", "position", "nationality", "birth", "place",
+    # Universal terms that appear in ALL documents (filtering for memory/performance)
+    "comprehensive", "international", "performance", "transfermarkt", "injury",
+    "summary", "market", "history", "database", "value",
+    # Stemmed versions and other universal terms
+    "data", "teammat", "sourc", "career", "assist", "app", "minut",
+    "available", "national", "significant", "teammate", "transfer", "goal"
 }
 
 def simple_stemmer(word: str) -> str:
@@ -53,9 +59,11 @@ for doc_idx, doc in enumerate(search_documents):
     # From detailed_content
     words = re.findall(r"\b[a-z]+\b", text)
     for word in words:
-        if word in COMPREHENSIVE_STOP_WORDS or len(word) <= 2:
+        if len(word) <= 2:
             continue
         stemmed = simple_stemmer(word)
+        if stemmed in COMPREHENSIVE_STOP_WORDS:
+            continue
         doc_tokens.add(stemmed)
 
     # From metadata.current_club
@@ -65,9 +73,10 @@ for doc_idx, doc in enumerate(search_documents):
         club_text = current_club.lower()
         club_words = re.findall(r"\b[a-z]+\b", club_text)
         for word in club_words:
-            if len(word) > 2 and word not in COMPREHENSIVE_STOP_WORDS:
+            if len(word) > 2:
                 stemmed = simple_stemmer(word)
-                doc_tokens.add(stemmed)
+                if stemmed not in COMPREHENSIVE_STOP_WORDS:
+                    doc_tokens.add(stemmed)
 
     # Update DF counts (once per doc)
     for token in doc_tokens:
@@ -97,5 +106,5 @@ with open("data/index/lexicon_complete.json", "w", encoding="utf-8") as f:
     json.dump(entries, f, ensure_ascii=False, indent=2)
 
 print("\nONE COMPLETE LEXICON WITH DF + TERM IDs BUILT!")
-print("Saved: lexicon_complete.json")
+print("Saved: data/index/lexicon_complete.json")
 print(f"{len(entries):,} tokens with term IDs ready for indexing!")

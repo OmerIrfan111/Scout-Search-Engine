@@ -2,24 +2,24 @@ import json
 import re
 from collections import defaultdict
 
-print("BUILDING FORWARD INDEX (TERM IDs)...")
+print("📁 BUILDING FORWARD INDEX (TERM IDs)...")
 print("=" * 50)
 
 # ---------- Load documents ----------
-print("Loading search documents...")
+print("📥 Loading search documents...")
 with open("data/processed/complete_player_profiles.json", "r", encoding="utf-8") as f:
     search_documents = json.load(f)
-print(f"Loaded {len(search_documents)} documents")
+print(f"✅ Loaded {len(search_documents)} documents")
 
 # ---------- Load lexicon (term_id mapping) ----------
-print("Loading lexicon (term IDs)...")
+print("📥 Loading lexicon (term IDs)...")
 with open("data/index/lexicon_complete.json", "r", encoding="utf-8") as f:
     lexicon_entries = json.load(f)
 
 token_to_id = {entry["token"]: entry["term_id"] for entry in lexicon_entries}
-print(f"Loaded {len(token_to_id):,} tokens in lexicon")
+print(f"✅ Loaded {len(token_to_id):,} tokens in lexicon")
 
-print("Building forward index with term IDs...")
+print("🏗️ Building forward index with term IDs...")
 
 forward_index = []  # list of doc objects
 
@@ -71,9 +71,9 @@ for doc_idx, doc in enumerate(search_documents):
     forward_index.append(doc_entry)
 
     if (doc_idx + 1) % 10000 == 0:
-        print(f"Processed {doc_idx + 1} documents...")
+        print(f"✅ Processed {doc_idx + 1} documents...")
 
-print("\nFORWARD INDEX STATISTICS (TERM IDs):")
+print("\n📊 FORWARD INDEX STATISTICS (TERM IDs):")
 print("=" * 40)
 doc_count = len(forward_index)
 total_terms_all = sum(d["total_terms"] for d in forward_index)
@@ -88,19 +88,19 @@ print(f"  Avg terms per document: {avg_terms_per_doc}")
 print(f"  Avg unique terms per document: {avg_unique_terms_per_doc}")
 
 # ---------- Save forward index (compact but readable) ----------
-print("\nSaving forward index (TERM IDs)...")
-with open("forward_index_termid.json", "w", encoding="utf-8") as f:
+print("\n💾 Saving forward index (TERM IDs)...")
+with open("data/index/forward_index_termid.json", "w", encoding="utf-8") as f:
     json.dump(forward_index, f, ensure_ascii=False, indent=1, separators=(",", ":"))
 
-print("FORWARD INDEX WITH TERM IDs BUILT!")
-print("Saved: forward_index_termid.json")
+print("🎯 FORWARD INDEX WITH TERM IDs BUILT!")
+print("📁 Saved: data/index/forward_index_termid.json")
 
 # ---------- Sample output ----------
-print("\nSAMPLE FORWARD INDEX ENTRIES (TERM IDs):")
+print("\n👀 SAMPLE FORWARD INDEX ENTRIES (TERM IDs):")
 print("=" * 50)
 
 for doc in forward_index[:3]:
-    print(f"\nPlayer / Doc: {doc['player_id']}")
+    print(f"\n📄 Player / Doc: {doc['player_id']}")
     print(f"  Player name: {doc['player_name']}")
     print(f"  Total terms: {doc['total_terms']}")
     print(f"  Unique terms: {doc['unique_terms']}")
@@ -109,4 +109,4 @@ for doc in forward_index[:3]:
     for t in sample_terms:
         print(f"    {t['term_id']}:{t['tf']}@{t['positions']}")
 
-print("\nFORWARD INDEX READY FOR INVERTED INDEX BUILDING!")
+print("\n✅ FORWARD INDEX READY FOR INVERTED INDEX BUILDING!")
